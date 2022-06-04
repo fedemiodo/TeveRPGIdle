@@ -1,7 +1,7 @@
 SmalltalkCISpec {
   #loading : [
     SCIMetacelloLoadSpec {
-      #baseline : 'ToDoWebApplication',
+      #baseline : 'TeveRPGIdle',
       #directory : '../source',
       #load : [ 'Development' ],
       #platforms : [  #pharo ]
@@ -9,7 +9,7 @@ SmalltalkCISpec {
   ],
   #testing : {
     #coverage : {
-      #packages : [ '{PROJECT_NAME}*' ],
+      #packages : [ 'TeveRPGIdle*' ],
       #format: #lcov
     }
   }
