@@ -29,7 +29,7 @@ HeroTest >> test01HeroIsLevel1WhenCreated [
 ]
 
 { #category : #tests }
-HeroTest >> test02HeroMayLevelUpWithEnoughExperience [
+HeroTest >> test02HeroWillLevelUpWithEnoughExperience [
 	
 	self assert: hero level equals: 1.
 	
@@ -43,7 +43,7 @@ HeroTest >> test02HeroMayLevelUpWithEnoughExperience [
 ]
 
 { #category : #tests }
-HeroTest >> test03HeroMayLevelUpManyTimesWithEnoughExperience [
+HeroTest >> test03HeroWillLevelUpManyTimesWithEnoughExperience [
 
 	self assert: hero level equals: 1.
 
@@ -62,4 +62,87 @@ HeroTest >> test04HeroMayNotHaveEnoughExperienceToLevelUp [
 	hero consolidateExperience.
 	
 	self assert: hero level equals: 1
+]
+
+{ #category : #tests }
+HeroTest >> test05HeroCanAttackAUnit [
+	
+	| dummy |
+	
+	dummy := Dummy new.
+	hero attack: dummy.
+	
+	self assert: dummy currentHealth equals: 90
+]
+
+{ #category : #tests }
+HeroTest >> test06HeroDamageIncreasesOnLevelUp [
+	
+	| dummy |
+	
+	dummy := Dummy new.
+	
+	self assert: dummy currentHealth equals: 100.
+	hero attack: dummy.
+	self assert: dummy currentHealth equals: 90.
+
+	self test02HeroWillLevelUpWithEnoughExperience.
+	
+	hero attack: dummy.
+	self assert: dummy currentHealth equals: 79
+]
+
+{ #category : #tests }
+HeroTest >> test07HeroCanAttackAUnitUntilItDies [
+	
+	| dummy |
+	
+	dummy := Dummy new.
+	
+	10 timesRepeat: [ hero attack: dummy ].
+	
+	self assert: dummy currentHealth equals: 0.
+	self assert: dummy isDead
+]
+
+{ #category : #tests }
+HeroTest >> test08HeroWillEarnExperienceUponDealingAKillingBlow [
+	
+	| dummy |
+	
+	dummy := Dummy new.
+	
+	10 timesRepeat: [ hero attack: dummy ].
+	
+	self assert: dummy currentHealth equals: 0.
+	self assert: dummy isDead.
+	
+	self assert: hero currentExperience equals: dummy experienceWorth
+]
+
+{ #category : #tests }
+HeroTest >> test09HeroCanEquipAnItemAndGainItsStats [
+	
+	| weapon |
+	
+	weapon := Weapon withDamageModifier: 1.
+	
+	self assert: hero attackDamage equals: 10.
+	hero equip: weapon.
+	self assert: hero attackDamage equals: 11
+]
+
+{ #category : #tests }
+HeroTest >> test10HeroCannotEquipWeaponWithHigherLevelRequirement [
+
+	| weapon |
+	weapon := Weapon withDamageModifier: 1 andMinimumLevel: 2.
+
+	self assert: hero attackDamage equals: 10.
+
+	self
+		should: [ hero equip: weapon ]
+		raise: Error
+		withExceptionDo: [ :error | 
+			self assert: hero attackDamage equals: 10 ]
 ]
