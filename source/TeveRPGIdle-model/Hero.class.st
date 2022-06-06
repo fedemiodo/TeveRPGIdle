@@ -5,18 +5,39 @@ Class {
 		'experienceChart',
 		'experience',
 		'level',
-		'weaponSlot'
+		'weaponSlot',
+		'strength',
+		'agility',
+		'intelligence',
+		'currentHealth',
+		'maximumHealth'
 	],
 	#category : #'TeveRPGIdle-model'
 }
 
-{ #category : #'instance creation' }
-Hero class >> withExperienceChart: anExperienceToLevelChart [ 
-	
-	^ self new initializeWithExperienceChart: anExperienceToLevelChart
+{ #category : #defaults }
+Hero class >> defaultExperienceChart [
+
+	^ ExperienceToLevelChart default
 ]
 
-{ #category : #itemization }
+{ #category : #'instance creation' }
+Hero class >> novice [
+
+	^ Novice strength: 4 agility: 3 intelligence: 3 andExperienceChart: self defaultExperienceChart
+]
+
+{ #category : #'private - instance creation' }
+Hero class >> strength: anAmountOfStrength agility: anAmountOfAgility intelligence: anAmountOfIntelligence andExperienceChart: anExperienceChart [
+
+	^ super new
+		  initializeStrength: anAmountOfStrength
+		  agility: anAmountOfAgility
+		  intelligence: anAmountOfIntelligence
+		  andExperienceChart: anExperienceChart
+]
+
+{ #category : #equipment }
 Hero >> assertFulfillsLevelRequirementsOf: aWeapon [
 
 	^ level >= aWeapon minimumLevel
@@ -25,25 +46,25 @@ Hero >> assertFulfillsLevelRequirementsOf: aWeapon [
 { #category : #combat }
 Hero >> attack: aDummy [
 
-	aDummy receiveDamage: self attackDamage from: self
+	aDummy receiveAttackFrom: self for: self attackDamage
 ]
 
 { #category : #accessing }
 Hero >> attackDamage [
 	
-	| baseDamage levelModifier weaponModifier |
+	| baseDamage weaponModifier |
 	
-	baseDamage := self baseDamage.
-	levelModifier := level.
+	baseDamage := self mainStat.
 	weaponModifier := weaponSlot damageModifier.
 	
-	^ baseDamage + levelModifier + weaponModifier
+	^ baseDamage + weaponModifier
 ]
 
-{ #category : #accessing }
-Hero >> baseDamage [
-	
-	^ 9
+{ #category : #'private - leveling' }
+Hero >> canLevelUpConsuming: requiredExperience [
+
+	self levelUpConsuming: requiredExperience.
+	self consolidateExperience
 ]
 
 { #category : #leveling }
@@ -58,13 +79,19 @@ Hero >> currentExperience [
 	^ experience
 ]
 
+{ #category : #accessing }
+Hero >> currentHealth [
+
+	^ currentHealth
+]
+
 { #category : #leveling }
 Hero >> earnExperience: anAmount [ 
 	
 	experience := experience + anAmount
 ]
 
-{ #category : #itemization }
+{ #category : #equipment }
 Hero >> equip: aWeapon [
 
 	(self assertFulfillsLevelRequirementsOf: aWeapon)
@@ -74,32 +101,78 @@ Hero >> equip: aWeapon [
 				'Requires level ...(complete with intelligent string).' ]
 ]
 
+{ #category : #'private - leveling' }
+Hero >> increaseStatsDueToLevelUp [
+
+	strength := strength + 1
+]
+
 { #category : #initialization }
-Hero >> initializeWithExperienceChart: anExperienceToLevelChart [ 
-	
-	experienceChart := anExperienceToLevelChart.
-	experience := 0.
-	level := 1.
+Hero >> initializeEquipment [
+
 	weaponSlot := Weapon unarmed
 ]
 
-{ #category : #stats }
+{ #category : #initialization }
+Hero >> initializeExperience [
+
+	experience := 0.
+	level := 1
+]
+
+{ #category : #initialization }
+Hero >> initializeHealth [
+
+	maximumHealth := 20 * strength.
+	currentHealth := maximumHealth
+]
+
+{ #category : #initialization }
+Hero >> initializeStrength: anAmountOfStrength agility: anAmountOfAgility intelligence: anAmountOfIntelligence andExperienceChart: anExperienceChart [
+
+	strength := anAmountOfStrength.
+	agility := anAmountOfAgility.
+	intelligence := anAmountOfIntelligence.
+	experienceChart := anExperienceChart.
+	self initializeExperience.
+	self initializeEquipment.
+	self initializeHealth
+]
+
+{ #category : #death }
+Hero >> isDead [
+
+	^ currentHealth < 1
+]
+
+{ #category : #accessing }
 Hero >> level [
 
 	^ level
 ]
 
 { #category : #'private - leveling' }
-Hero >> levelUp [
-
-	level := level + 1
-]
-
-{ #category : #'private - leveling' }
 Hero >> levelUpConsuming: requiredExperience [
 
 	experience := experience - requiredExperience.
-	self levelUp.
+	level := level + 1.
+	self increaseStatsDueToLevelUp.
+]
+
+{ #category : #accessing }
+Hero >> mainStat [
 	
-	self consolidateExperience
+	self subclassResponsibility 
+]
+
+{ #category : #accessing }
+Hero >> maximumHealth [
+
+	^ maximumHealth
+]
+
+{ #category : #combat }
+Hero >> receiveAttackFor: anAmount [
+
+	currentHealth := currentHealth - anAmount
 ]

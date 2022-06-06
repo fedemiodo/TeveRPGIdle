@@ -32,7 +32,7 @@ Dummy >> isDead [
 ]
 
 { #category : #combat }
-Dummy >> receiveDamage: damageTaken from: anAttacker [
+Dummy >> receiveAttackFrom: anAttacker for: damageTaken [
 
 	currentHealth := currentHealth - damageTaken.
 	

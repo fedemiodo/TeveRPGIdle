@@ -28,7 +28,7 @@ ExperienceToLevelChart >> attemptToLevel: aHero from: aStartingLevel using: anAm
 	requiredExperience := baseExperienceToLevel * (multiplier raisedTo: aStartingLevel - 1).
 	
 	(anAmountOfExperience >= requiredExperience)
-		ifTrue: [ aHero levelUpConsuming: requiredExperience ]
+		ifTrue: [ aHero canLevelUpConsuming: requiredExperience ]
 ]
 
 { #category : #'private - testing' }

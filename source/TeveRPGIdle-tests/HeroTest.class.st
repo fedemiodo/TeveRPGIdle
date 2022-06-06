@@ -8,18 +8,12 @@ Class {
 	#category : #'TeveRPGIdle-tests'
 }
 
-{ #category : #accessing }
-HeroTest >> heroWithDefaultExperienceChart [
-
-	^ Hero withExperienceChart: expChart
-]
-
 { #category : #'set up' }
 HeroTest >> setUp [
 
 	super setUp.
-	expChart := ExperienceToLevelChart default.
-	hero := self heroWithDefaultExperienceChart.
+	hero := Novice new.
+	expChart := Hero defaultExperienceChart
 ]
 
 { #category : #tests }
@@ -72,24 +66,25 @@ HeroTest >> test05HeroCanAttackAUnit [
 	dummy := Dummy new.
 	hero attack: dummy.
 	
-	self assert: dummy currentHealth equals: 90
+	self assert: dummy currentHealth equals: 100 - hero attackDamage
 ]
 
 { #category : #tests }
 HeroTest >> test06HeroDamageIncreasesOnLevelUp [
 	
-	| dummy |
+	| dummy heroDamage |
 	
 	dummy := Dummy new.
+	heroDamage := hero attackDamage.
 	
 	self assert: dummy currentHealth equals: 100.
 	hero attack: dummy.
-	self assert: dummy currentHealth equals: 90.
+	self assert: dummy currentHealth equals: 100 - heroDamage.
 
 	self test02HeroWillLevelUpWithEnoughExperience.
 	
 	hero attack: dummy.
-	self assert: dummy currentHealth equals: 79
+	self assert: dummy currentHealth < (100 - heroDamage - heroDamage)
 ]
 
 { #category : #tests }
@@ -99,9 +94,8 @@ HeroTest >> test07HeroCanAttackAUnitUntilItDies [
 	
 	dummy := Dummy new.
 	
-	10 timesRepeat: [ hero attack: dummy ].
-	
-	self assert: dummy currentHealth equals: 0.
+	[ dummy currentHealth > 0 ] whileTrue: [ hero attack: dummy ].
+
 	self assert: dummy isDead
 ]
 
@@ -112,11 +106,9 @@ HeroTest >> test08HeroWillEarnExperienceUponDealingAKillingBlow [
 	
 	dummy := Dummy new.
 	
-	10 timesRepeat: [ hero attack: dummy ].
+	[ dummy currentHealth > 0 ] whileTrue: [ hero attack: dummy ].
 	
-	self assert: dummy currentHealth equals: 0.
 	self assert: dummy isDead.
-	
 	self assert: hero currentExperience equals: dummy experienceWorth
 ]
 
@@ -127,9 +119,9 @@ HeroTest >> test09HeroCanEquipAnItemAndGainItsStats [
 	
 	weapon := Weapon withDamageModifier: 1.
 	
-	self assert: hero attackDamage equals: 10.
+	self assert: hero attackDamage equals: 4.
 	hero equip: weapon.
-	self assert: hero attackDamage equals: 11
+	self assert: hero attackDamage equals: 5
 ]
 
 { #category : #tests }
@@ -138,11 +130,33 @@ HeroTest >> test10HeroCannotEquipWeaponWithHigherLevelRequirement [
 	| weapon |
 	weapon := Weapon withDamageModifier: 1 andMinimumLevel: 2.
 
-	self assert: hero attackDamage equals: 10.
+	self assert: hero attackDamage equals: 4.
 
 	self
 		should: [ hero equip: weapon ]
 		raise: Error
 		withExceptionDo: [ :error | 
-			self assert: hero attackDamage equals: 10 ]
+			self assert: hero attackDamage equals: 4 ]
+]
+
+{ #category : #tests }
+HeroTest >> test11HeroCanReceiveDamageOnAttack [
+
+	| creature |
+	creature := Creature satyr.
+
+	creature attack: hero.
+	
+	self assert: hero currentHealth equals: hero maximumHealth - creature attackDamage
+]
+
+{ #category : #tests }
+HeroTest >> test12HeroMayDieFromDamage [
+
+	| creature |
+	creature := Creature iceBear.
+
+	creature attack: hero.
+	
+	self assert: hero isDead
 ]
