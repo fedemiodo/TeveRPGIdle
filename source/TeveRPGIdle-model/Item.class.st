@@ -19,8 +19,8 @@ Item >> initializeWithStatistics: aStatistics [
 	statistics := aStatistics
 ]
 
-{ #category : #testing }
-Item >> statisticsAreEqualTo: aCollection [
+{ #category : #accessing }
+Item >> statistics [
 
-	^ statistics statisticsAreEqualTo: aCollection
+	^ statistics
 ]

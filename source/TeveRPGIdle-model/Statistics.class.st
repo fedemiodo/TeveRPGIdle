@@ -5,7 +5,7 @@ Class {
 		'strength',
 		'agility',
 		'intelligence',
-		'rawDamage'
+		'attackDamage'
 	],
 	#category : #'TeveRPGIdle-model'
 }
@@ -38,7 +38,7 @@ Statistics >> agility [
 { #category : #accessing }
 Statistics >> attackDamage [
 
-	^ rawDamage
+	^ attackDamage
 ]
 
 { #category : #initialization }
@@ -47,7 +47,7 @@ Statistics >> initializeStrength: str agility: agi intelligence: int damage: dmg
 	strength := str.
 	agility := agi.
 	intelligence := int.
-	rawDamage := dmg
+	attackDamage := dmg
 ]
 
 { #category : #accessing }
@@ -63,15 +63,15 @@ Statistics >> modifyAgility: aNumber [
 ]
 
 { #category : #private }
-Statistics >> modifyIntelligence: aNumber [
+Statistics >> modifyAttackDamage: aNumber [
 
-	intelligence := intelligence + aNumber
+	attackDamage := attackDamage + aNumber
 ]
 
 { #category : #private }
-Statistics >> modifyRawDamage: aNumber [
+Statistics >> modifyIntelligence: aNumber [
 
-	rawDamage := rawDamage + aNumber
+	intelligence := intelligence + aNumber
 ]
 
 { #category : #private }
@@ -81,12 +81,12 @@ Statistics >> modifyStrength: aNumber [
 ]
 
 { #category : #'stats API' }
-Statistics >> modifyWith: aCollection [
+Statistics >> modifyWith: anotherStatistics [
 
-	self modifyStrength: aCollection first.
-	self modifyAgility: aCollection second.
-	self modifyIntelligence: aCollection third.
-	self modifyRawDamage: aCollection fourth
+	self modifyStrength: anotherStatistics strength.
+	self modifyAgility: anotherStatistics agility.
+	self modifyIntelligence: anotherStatistics intelligence.
+	self modifyAttackDamage: anotherStatistics attackDamage
 ]
 
 { #category : #testing }
@@ -95,7 +95,7 @@ Statistics >> statisticsAreEqualTo: aCollection [
 	^ ((strength = aCollection first
 		and: [ agility =  aCollection second])
 			and: [ intelligence = aCollection third ])
-				and: [ rawDamage = aCollection fourth ]
+				and: [ attackDamage = aCollection fourth ]
 ]
 
 { #category : #accessing }

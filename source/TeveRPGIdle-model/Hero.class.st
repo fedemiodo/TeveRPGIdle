@@ -69,18 +69,10 @@ Hero >> earnExperience: anAmount [
 	experience := experience + anAmount
 ]
 
-{ #category : #equipment }
-Hero >> equip: anItem [
-	
-	statistics removeItem: currentEquipment.
-	currentEquipment equip: anItem.
-	statistics addItem: anItem
-]
-
 { #category : #'private - leveling' }
 Hero >> increaseStatsDueToLevelUp [
 
-	statistics modifyWith: #(1 1 1 0)
+	statistics modifyWith: (Statistics startingFrom: #(1 1 1 0))
 ]
 
 { #category : #initialization }
@@ -101,15 +93,6 @@ Hero >> initializeHealth [
 
 	maximumHealth := 20 * statistics strength.
 	currentHealth := maximumHealth
-]
-
-{ #category : #initialization }
-Hero >> initializeUsing: anExperienceChart [
-
-	experienceChart := anExperienceChart.
-	self initializeExperience.
-	self initializeEquipment.
-	self initializeHealth
 ]
 
 { #category : #initialization }
@@ -140,12 +123,6 @@ Hero >> levelUpConsuming: requiredExperience [
 	experience := experience - requiredExperience.
 	level := level + 1.
 	self increaseStatsDueToLevelUp.
-]
-
-{ #category : #accessing }
-Hero >> mainStat [
-	
-	^ #strength
 ]
 
 { #category : #accessing }
