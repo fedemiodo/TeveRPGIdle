@@ -5,42 +5,25 @@ Class {
 		'experienceChart',
 		'experience',
 		'level',
-		'weaponSlot',
-		'strength',
-		'agility',
-		'intelligence',
 		'currentHealth',
-		'maximumHealth'
+		'maximumHealth',
+		'currentEquipment',
+		'statistics'
 	],
 	#category : #'TeveRPGIdle-model'
 }
 
-{ #category : #defaults }
-Hero class >> defaultExperienceChart [
-
-	^ ExperienceToLevelChart default
-]
-
 { #category : #'instance creation' }
-Hero class >> novice [
+Hero class >> noviceUsing: anExperienceChart [
 
-	^ Novice strength: 4 agility: 3 intelligence: 3 andExperienceChart: self defaultExperienceChart
+	^ self using: anExperienceChart withInitialStatistics:
+		(Statistics startingFrom: #(2 2 2 1))
 ]
 
 { #category : #'private - instance creation' }
-Hero class >> strength: anAmountOfStrength agility: anAmountOfAgility intelligence: anAmountOfIntelligence andExperienceChart: anExperienceChart [
+Hero class >> using: anExperienceChart withInitialStatistics: aStatistics [
 
-	^ super new
-		  initializeStrength: anAmountOfStrength
-		  agility: anAmountOfAgility
-		  intelligence: anAmountOfIntelligence
-		  andExperienceChart: anExperienceChart
-]
-
-{ #category : #equipment }
-Hero >> assertFulfillsLevelRequirementsOf: aWeapon [
-
-	^ level >= aWeapon minimumLevel
+	^ self new initializeUsing: anExperienceChart withInitialStatistics: aStatistics
 ]
 
 { #category : #combat }
@@ -52,12 +35,7 @@ Hero >> attack: aDummy [
 { #category : #accessing }
 Hero >> attackDamage [
 	
-	| baseDamage weaponModifier |
-	
-	baseDamage := self mainStat.
-	weaponModifier := weaponSlot damageModifier.
-	
-	^ baseDamage + weaponModifier
+	^ statistics attackDamage + statistics strength
 ]
 
 { #category : #'private - leveling' }
@@ -92,25 +70,23 @@ Hero >> earnExperience: anAmount [
 ]
 
 { #category : #equipment }
-Hero >> equip: aWeapon [
-
-	(self assertFulfillsLevelRequirementsOf: aWeapon)
-		ifTrue: [ weaponSlot := aWeapon ]
-		ifFalse: [ 
-			Error signal:
-				'Requires level ...(complete with intelligent string).' ]
+Hero >> equip: anItem [
+	
+	statistics removeItem: currentEquipment.
+	currentEquipment equip: anItem.
+	statistics addItem: anItem
 ]
 
 { #category : #'private - leveling' }
 Hero >> increaseStatsDueToLevelUp [
 
-	strength := strength + 1
+	statistics modifyWith: #(1 1 1 0)
 ]
 
 { #category : #initialization }
 Hero >> initializeEquipment [
 
-	weaponSlot := Weapon unarmed
+	currentEquipment := Array new: 6
 ]
 
 { #category : #initialization }
@@ -123,17 +99,24 @@ Hero >> initializeExperience [
 { #category : #initialization }
 Hero >> initializeHealth [
 
-	maximumHealth := 20 * strength.
+	maximumHealth := 20 * statistics strength.
 	currentHealth := maximumHealth
 ]
 
 { #category : #initialization }
-Hero >> initializeStrength: anAmountOfStrength agility: anAmountOfAgility intelligence: anAmountOfIntelligence andExperienceChart: anExperienceChart [
+Hero >> initializeUsing: anExperienceChart [
 
-	strength := anAmountOfStrength.
-	agility := anAmountOfAgility.
-	intelligence := anAmountOfIntelligence.
 	experienceChart := anExperienceChart.
+	self initializeExperience.
+	self initializeEquipment.
+	self initializeHealth
+]
+
+{ #category : #initialization }
+Hero >> initializeUsing: anExperienceChart withInitialStatistics: aStatistics [
+
+	experienceChart := anExperienceChart.
+	statistics := aStatistics.
 	self initializeExperience.
 	self initializeEquipment.
 	self initializeHealth
@@ -162,7 +145,7 @@ Hero >> levelUpConsuming: requiredExperience [
 { #category : #accessing }
 Hero >> mainStat [
 	
-	self subclassResponsibility 
+	^ #strength
 ]
 
 { #category : #accessing }
@@ -175,4 +158,10 @@ Hero >> maximumHealth [
 Hero >> receiveAttackFor: anAmount [
 
 	currentHealth := currentHealth - anAmount
+]
+
+{ #category : #testing }
+Hero >> statisticsAreEqualTo: aCollection [
+
+	^ statistics statisticsAreEqualTo: aCollection
 ]

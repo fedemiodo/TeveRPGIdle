@@ -13,7 +13,7 @@ Dummy >> currentHealth [
 	^ currentHealth
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #death }
 Dummy >> experienceWorth [
 
 	^ 1
